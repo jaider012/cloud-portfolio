@@ -17,8 +17,9 @@ provider "aws" {
 # ---------- ECR ----------
 
 resource "aws_ecr_repository" "api" {
-  name         = "${var.name}-api"
-  force_delete = true
+  name                 = "${var.name}-api"
+  force_delete         = true
+  image_tag_mutability = "IMMUTABLE" # deploy by git SHA, never overwrite a tag
 
   image_scanning_configuration {
     scan_on_push = true
@@ -27,51 +28,74 @@ resource "aws_ecr_repository" "api" {
 
 # ---------- Security groups: ALB public, tasks only reachable from ALB ----------
 
+# Rules live in separate resources so the two SGs can reference each other
+# without a dependency cycle.
+
 resource "aws_security_group" "alb" {
   name   = "${var.name}-alb"
   vpc_id = var.vpc_id
-
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
 }
 
 resource "aws_security_group" "task" {
   name   = "${var.name}-task"
   vpc_id = var.vpc_id
+}
 
-  ingress {
-    from_port       = 3000
-    to_port         = 3000
-    protocol        = "tcp"
-    security_groups = [aws_security_group.alb.id]
-  }
+resource "aws_vpc_security_group_ingress_rule" "alb_http" {
+  security_group_id = aws_security_group.alb.id
+  from_port         = 80
+  to_port           = 80
+  ip_protocol       = "tcp"
+  cidr_ipv4         = "0.0.0.0/0"
+}
 
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+# ALB can only talk to the tasks — no open egress
+resource "aws_vpc_security_group_egress_rule" "alb_to_task" {
+  security_group_id            = aws_security_group.alb.id
+  from_port                    = 3000
+  to_port                      = 3000
+  ip_protocol                  = "tcp"
+  referenced_security_group_id = aws_security_group.task.id
+}
+
+resource "aws_vpc_security_group_ingress_rule" "task_from_alb" {
+  security_group_id            = aws_security_group.task.id
+  from_port                    = 3000
+  to_port                      = 3000
+  ip_protocol                  = "tcp"
+  referenced_security_group_id = aws_security_group.alb.id
+}
+
+# Tasks need outbound 443 for ECR image pulls and the external Postgres.
+# Destination cannot be narrowed to a CIDR: ECR sits behind rotating AWS IPs.
+#trivy:ignore:AVD-AWS-0104
+resource "aws_vpc_security_group_egress_rule" "task_https" {
+  security_group_id = aws_security_group.task.id
+  from_port         = 443
+  to_port           = 443
+  ip_protocol       = "tcp"
+  cidr_ipv4         = "0.0.0.0/0"
+}
+
+#trivy:ignore:AVD-AWS-0104
+resource "aws_vpc_security_group_egress_rule" "task_postgres" {
+  security_group_id = aws_security_group.task.id
+  from_port         = 5432
+  to_port           = 5432
+  ip_protocol       = "tcp"
+  cidr_ipv4         = "0.0.0.0/0"
 }
 
 # ---------- ALB ----------
 
+# Internet-facing by design: this is the public entry point of the API.
+#trivy:ignore:AVD-AWS-0053
 resource "aws_lb" "api" {
-  name               = "${var.name}-alb"
-  load_balancer_type = "application"
-  subnets            = var.public_subnet_ids
-  security_groups    = [aws_security_group.alb.id]
+  name                       = "${var.name}-alb"
+  load_balancer_type         = "application"
+  subnets                    = var.public_subnet_ids
+  security_groups            = [aws_security_group.alb.id]
+  drop_invalid_header_fields = true
 }
 
 resource "aws_lb_target_group" "api" {
@@ -89,6 +113,9 @@ resource "aws_lb_target_group" "api" {
   }
 }
 
+# HTTP-only until the lab has a domain: an ACM cert requires one. The week1
+# site already demonstrates the TLS pattern; capstone adds the HTTPS listener.
+#trivy:ignore:AVD-AWS-0054
 resource "aws_lb_listener" "http" {
   load_balancer_arn = aws_lb.api.arn
   port              = 80

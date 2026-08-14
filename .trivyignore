@@ -1,0 +1,7 @@
+# Accepted risks — reviewed 2026-08-14. Every entry needs a justification.
+
+# S3 buckets use SSE-S3 / AWS-managed KMS instead of a customer-managed key.
+# CMKs bill $1/month each + rotation overhead; contents are public site assets
+# and terraform state in a personal lab account. Revisit for any bucket that
+# ever holds user data.
+AVD-AWS-0132

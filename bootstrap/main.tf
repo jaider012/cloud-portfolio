@@ -26,6 +26,9 @@ provider "aws" {
 
 # ---------- Remote state: S3 + DynamoDB lock ----------
 
+# Encrypted with the AWS-managed aws/s3 KMS key; a customer-managed key adds
+# $1/month + rotation overhead without changing the threat model for a lab.
+#trivy:ignore:AVD-AWS-0132
 resource "aws_s3_bucket" "tfstate" {
   bucket = var.state_bucket_name
 }
@@ -41,6 +44,8 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "tfstate" {
   bucket = aws_s3_bucket.tfstate.id
   rule {
     apply_server_side_encryption_by_default {
+      # AWS-managed aws/s3 key; CMK adds cost without changing the lab threat model
+      #trivy:ignore:AVD-AWS-0132
       sse_algorithm = "aws:kms"
     }
   }

@@ -18,8 +18,21 @@ provider "aws" {
   region = "us-east-1"
 }
 
+# CMK encryption skipped deliberately: KMS keys bill $1/month each and the
+# bucket holds only public website assets. SSE-S3 covers encryption at rest.
+#trivy:ignore:AVD-AWS-0132
 resource "aws_s3_bucket" "site" {
   bucket = var.bucket_name
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "site" {
+  bucket = aws_s3_bucket.site.id
+  rule {
+    apply_server_side_encryption_by_default {
+      #trivy:ignore:AVD-AWS-0132
+      sse_algorithm = "AES256"
+    }
+  }
 }
 
 resource "aws_s3_bucket_public_access_block" "site" {
@@ -55,6 +68,9 @@ resource "aws_s3_bucket_policy" "site" {
   })
 }
 
+# WAF skipped deliberately: ~$5+/month for a static site with no forms,
+# no auth, and no dynamic origin. Revisit for the capstone's API.
+#trivy:ignore:AVD-AWS-0011
 resource "aws_cloudfront_distribution" "site" {
   enabled             = true
   default_root_object = "index.html"

@@ -51,6 +51,9 @@ resource "aws_security_group" "private_instance" {
   description = "No inbound; outbound HTTPS only (SSM + package repos)"
   vpc_id      = module.network.vpc_id
 
+  # SSM endpoints sit behind rotating AWS IPs, so 443 egress cannot be
+  # narrowed to a CIDR; VPC endpoints would remove this (see ADR 0003).
+  #trivy:ignore:AVD-AWS-0104
   egress {
     from_port   = 443
     to_port     = 443
