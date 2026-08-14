@@ -1,0 +1,16 @@
+{
+  "name": "url-shortener-api",
+  "version": "1.0.0",
+  "description": "URL shortener API - Node.js + Postgres, deployed on ECS Fargate",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "node --test \"test/**/*.test.js\""
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "nanoid": "^3.3.7",
+    "pg": "^8.12.0"
+  }
+}

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jaider Panqueva — Cloud & Software Engineer</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>Jaider Panqueva</h1>
+    <p class="tagline">Cloud & Software Engineer — AWS · Azure · Terraform · Docker · CI/CD</p>
+    <nav>
+      <a href="https://github.com/jaider012" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://www.linkedin.com/in/jaiderpanqueva" target="_blank" rel="noopener">LinkedIn</a>
+      <a href="mailto:12carta@gmail.com">Email</a>
+    </nav>
+  </header>
+
+  <main>
+    <section id="about">
+      <h2>About</h2>
+      <p>
+        I build and deploy cloud infrastructure and applications, with everything defined as code.
+        This site itself is a project: hosted on <strong>S3 + CloudFront</strong> with HTTPS via ACM,
+        fully provisioned with <strong>Terraform</strong>.
+      </p>
+    </section>
+
+    <section id="projects">
+      <h2>Projects</h2>
+
+      <article class="card">
+        <h3>Static Site on AWS (this site)</h3>
+        <p>S3 + CloudFront + ACM + Route 53, provisioned with Terraform. Zero-server hosting with global CDN and HTTPS.</p>
+        <p class="stack">S3 · CloudFront · ACM · Terraform</p>
+        <a href="https://github.com/jaider012/cloud-portfolio/tree/main/week1-static-site">Code →</a>
+      </article>
+
+      <article class="card">
+        <h3>VPC Networking Lab</h3>
+        <p>Multi-AZ VPC with public/private subnets, NAT gateway, and a private EC2 instance accessed only via SSM Session Manager — no open SSH ports.</p>
+        <p class="stack">VPC · NAT · SSM · Terraform</p>
+        <a href="https://github.com/jaider012/cloud-portfolio/tree/main/week2-vpc-lab">Code →</a>
+      </article>
+
+      <article class="card">
+        <h3>URL Shortener on ECS Fargate</h3>
+        <p>Node.js API, Dockerized, deployed to ECS Fargate behind an Application Load Balancer inside the VPC lab network.</p>
+        <p class="stack">Node.js · Docker · ECR · ECS Fargate · ALB</p>
+        <a href="https://github.com/jaider012/cloud-portfolio/tree/main/week3-containers-api">Code →</a>
+      </article>
+    </section>
+  </main>
+
+  <footer>
+    <p>Built as part of a <a href="https://github.com/jaider012/cloud-portfolio">3-month hands-on cloud portfolio</a>. Deployed with Terraform.</p>
+  </footer>
+</body>
+</html>
