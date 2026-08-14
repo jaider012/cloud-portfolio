@@ -25,7 +25,7 @@ jobs:
     if: vars.AWS_DEPLOY_ROLE_ARN != ''
     environment: production
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Assume deploy role via OIDC
         uses: aws-actions/configure-aws-credentials@v4
