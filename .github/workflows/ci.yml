@@ -54,7 +54,7 @@ jobs:
           - week3-containers-api/terraform
     steps:
       - uses: actions/checkout@v4
-      - uses: hashicorp/setup-terraform@v3
+      - uses: hashicorp/setup-terraform@v4
       - run: terraform fmt -check
         working-directory: ${{ matrix.dir }}
       - run: terraform init -backend=false
