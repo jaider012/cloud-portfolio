@@ -69,10 +69,7 @@ jobs:
       security-events: write
     steps:
       - uses: actions/checkout@v4
+      - name: Install Trivy
+        run: curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
       - name: Trivy IaC + secrets scan
-        uses: aquasecurity/trivy-action@0.24.0
-        with:
-          scan-type: fs
-          scanners: misconfig,secret
-          exit-code: "1"
-          severity: HIGH,CRITICAL
+        run: trivy fs --scanners misconfig,secret --exit-code 1 --severity HIGH,CRITICAL .
