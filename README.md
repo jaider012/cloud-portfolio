@@ -15,6 +15,14 @@ Hands-on portfolio integrating **programming, cloud (AWS/Azure), and networking*
 | 5 | Azure counterpart (Weeks 6–7) | Container Apps, VNet, Azure Pipelines | ⏳ Planned |
 | 6 | Capstone: 3-tier production app (Weeks 9–10) | React, ECS, RDS, blue/green deploys | ⏳ Planned |
 
+## Engineering practices
+
+- **No AWS keys anywhere** — CI deploys via [GitHub OIDC federation](./docs/adr/0001-github-oidc-instead-of-aws-keys.md) ([`bootstrap/`](./bootstrap) creates the role, remote state bucket, and lock table).
+- **Reusable modules** — networking lives in [`modules/network`](./modules/network) (multi-AZ, optional NAT-per-AZ, flow logs) and is consumed by the labs.
+- **Security scanning in CI** — Trivy misconfiguration + secret scan blocks merges on HIGH/CRITICAL; Dependabot patches Actions, npm, Terraform, and Docker weekly.
+- **Decisions are documented** — see [`docs/adr/`](./docs/adr) for why OIDC over keys, OAC over public buckets, SSM over bastions.
+- **`make check`** runs everything CI runs, locally.
+
 ## Principles
 
 - **Everything as code** — every resource is reproducible with `terraform apply`.

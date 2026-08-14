@@ -1,13 +1,13 @@
 output "vpc_id" {
-  value = aws_vpc.lab.id
+  value = module.network.vpc_id
 }
 
 output "public_subnet_ids" {
-  value = aws_subnet.public[*].id
+  value = module.network.public_subnet_ids
 }
 
 output "private_subnet_ids" {
-  value = aws_subnet.private[*].id
+  value = module.network.private_subnet_ids
 }
 
 output "private_instance_id" {

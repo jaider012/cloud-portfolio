@@ -1,0 +1,26 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: npm
+    directory: /week3-containers-api/api
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: terraform
+    directories:
+      - /bootstrap
+      - /modules/network
+      - /week1-static-site/terraform
+      - /week2-vpc-lab/terraform
+      - /week3-containers-api/terraform
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: docker
+    directory: /week3-containers-api/api
+    schedule:
+      interval: weekly

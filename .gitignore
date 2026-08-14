@@ -4,5 +4,6 @@ node_modules/
 *.tfstate.*
 .terraform.lock.hcl
 terraform.tfvars
+backend.hcl
 *.env
 .DS_Store

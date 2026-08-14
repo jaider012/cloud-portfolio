@@ -1,0 +1,45 @@
+name: Deploy site
+
+# Deploys week1 static site via OIDC — no AWS keys stored in GitHub.
+# Activates once the AWS_DEPLOY_ROLE_ARN repo variable is set
+# (output of the bootstrap stack). Until then the job is skipped.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "week1-static-site/site/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write # required for OIDC federation
+
+concurrency:
+  group: deploy-site
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: vars.AWS_DEPLOY_ROLE_ARN != ''
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Assume deploy role via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Sync site to S3
+        run: |
+          aws s3 sync week1-static-site/site "s3://${{ vars.SITE_BUCKET }}" \
+            --delete --cache-control "public, max-age=300"
+
+      - name: Invalidate CloudFront cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id "${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}" \
+            --paths "/*"
